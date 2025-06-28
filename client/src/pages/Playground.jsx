@@ -76,7 +76,8 @@ const Playground = () => {
         }))
         : [];
 
-      const res = await axios.post("http://localhost:5000/api/execute", {
+        const API_BASE = process.env.REACT_APP_API_BASE;
+      const res = await axios.post(`${API_BASE}/api/execute`, {
         language,
         code,
         testCases,
