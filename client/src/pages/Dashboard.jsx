@@ -33,7 +33,7 @@ const labelToKeyMap = {
   "HR / Behavioral": "behavioral"
 };
 
-const API = process.env.REACT_APP_API_BASE || "http://localhost:5000";
+const API = process.env.REACT_APP_API_BASE;
 
 export default function Dashboard() {
   const [query, setQuery] = useState('');
