@@ -4,10 +4,17 @@ services:
     build: ./server
     ports:
       - "5050:5000"
-    env_file:
-      - ./server/.env
+    depends_on:
+      - compiler
+    environment:
+      - COMPILER_API=http://compiler:8000/run
     volumes:
       - ./server:/app
+  
+  compiler:
+      build: ./compiler
+      ports:
+        - "8000:8000"
 
   frontend:
     build: ./client

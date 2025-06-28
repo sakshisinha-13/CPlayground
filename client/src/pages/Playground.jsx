@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import AceEditor from "react-ace";
 import axios from "axios";
-import { getAIResponse } from "../api/ai"; // ✅ Import AI helper
+import { getAIResponse } from "../api/ai"; 
 import {
   Panel,
   PanelGroup,
@@ -77,7 +77,7 @@ const Playground = () => {
         : [];
 
         const API_BASE = process.env.REACT_APP_API_BASE;
-      const res = await axios.post(`${API_BASE}/api/execute`, {
+      const res = await axios.post(`${API_BASE}/api/code/execute`, {
         language,
         code,
         testCases,

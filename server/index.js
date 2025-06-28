@@ -50,9 +50,9 @@ app.use("/api/auth", authRoutes);
 const progressRoutes = require("./routes/progress");
 app.use("/api/progress", progressRoutes);
 
-// --- Code Execution Route ---
-const executeRoute = require("./routes/execute");
-app.use("/api/execute", executeRoute);
+const codeRoutes = require("./routes/codeRoutes");
+app.use("/api/code", codeRoutes);
+
 
 // --- Routes ---
 const problemRoutes = require("./routes/problems");
