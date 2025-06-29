@@ -49,105 +49,126 @@ export default function Dashboard() {
   const previousQuery = useRef('');
   const restoredFilters = useRef(false);
   const [tickedQuestions, setTickedQuestions] = useState({});
-const [darkMode, setDarkMode] = useState(() => {
-  const savedTheme = localStorage.getItem("theme");
-  return savedTheme === "dark";
-});
+  const [darkMode, setDarkMode] = useState(() => {
+    const savedTheme = localStorage.getItem("theme");
+    return savedTheme === "dark";
+  });
 
-useEffect(() => {
-  document.documentElement.classList.toggle('dark', darkMode);
-  localStorage.setItem("theme", darkMode ? "dark" : "light");
-}, [darkMode]);
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', darkMode);
+    localStorage.setItem("theme", darkMode ? "dark" : "light");
+  }, [darkMode]);
 
-useEffect(() => {
-  const savedFilters = JSON.parse(localStorage.getItem("dashboardFilters"));
-  if (savedFilters) {
-    setQuery(savedFilters.query || '');
-    setRole(savedFilters.role || '');
-    setYoe(savedFilters.yoe || '');
-    setAssessmentType(savedFilters.assessmentType || '');
-    setTopic(savedFilters.topic || '');
-    setYear(savedFilters.year || '');
-    setDifficulty(savedFilters.difficulty || '');
-    restoredFilters.current = true; // ✅ mark that we restored filters
-  }
-}, []);
-useEffect(() => {
-  if (restoredFilters.current && query !== '') {
+  useEffect(() => {
+    const savedFilters = JSON.parse(localStorage.getItem("dashboardFilters"));
+    if (savedFilters) {
+      setQuery(savedFilters.query || '');
+      setRole(savedFilters.role || '');
+      setYoe(savedFilters.yoe || '');
+      setAssessmentType(savedFilters.assessmentType || '');
+      setTopic(savedFilters.topic || '');
+      setYear(savedFilters.year || '');
+      setDifficulty(savedFilters.difficulty || '');
+      restoredFilters.current = true; // ✅ mark that we restored filters
+    }
+  }, []);
+
+  useEffect(() => {
+    const fetchAllQuestions = async () => {
+      try {
+        const res = await fetch(`${API}/api/problems?limit=3`);
+        const data = await res.json();
+        setFilteredQuestions(data);
+        setNoMatch(false);
+      } catch (err) {
+        console.error("❌ Failed to load default questions:", err.message);
+      }
+    };
+
+    fetchAllQuestions();
+  }, []);
+
+  useEffect(() => {
     handleSearch();
-    restoredFilters.current = false; // only call once
-  }
-}, [query, role, yoe, assessmentType, topic, year, difficulty]);
+  }, [query, role, yoe, assessmentType, topic, year, difficulty]);
   const handleSearch = async () => {
-  const company = query.trim(); // Company name input
-  const filters = {
-  query: company,
-  role,
-  yoe,
-  assessmentType,
-  topic,
-  year,
-  difficulty,
-};
+    const company = query.trim(); // Company name input
+    const filters = {
+      query: company,
+      role,
+      yoe,
+      assessmentType,
+      topic,
+      year,
+      difficulty,
+    };
 
-localStorage.setItem("dashboardFilters", JSON.stringify(filters));
+    localStorage.setItem("dashboardFilters", JSON.stringify(filters));
 
-  if (!company || previousQuery.current === company) return;
+    // if all fields are empty, fetch default 3 questions
+    if (!company && !role && !yoe && !assessmentType && !topic && !difficulty && !year) {
+      const res = await fetch(`${API}/api/problems?limit=3`);
+      const data = await res.json();
+      setFilteredQuestions(data);
+      setNoMatch(false);
+      return;
+    }
 
-  const url = new URL(`${API}/api/problems`); // Correct endpoint
 
-  // Dynamically append filters
-  url.searchParams.append("company", company);
-  if (role) url.searchParams.append("role", role);
-  if (yoe) url.searchParams.append("yoe", yoe);
-  if (assessmentType) url.searchParams.append("type", assessmentType);
-  if (topic) url.searchParams.append("topic", labelToKeyMap[topic] || topic);
-  if (difficulty) url.searchParams.append("difficulty", difficulty);
-  if (year) url.searchParams.append("year", year);
+    const url = new URL(`${API}/api/problems`); // Correct endpoint
 
-  console.log("Fetching from:", url.toString());
+    // Dynamically append filters
+    url.searchParams.append("company", company);
+    if (role) url.searchParams.append("role", role);
+    if (yoe) url.searchParams.append("yoe", yoe);
+    if (assessmentType) url.searchParams.append("type", assessmentType);
+    if (topic) url.searchParams.append("topic", labelToKeyMap[topic] || topic);
+    if (difficulty) url.searchParams.append("difficulty", difficulty);
+    if (year) url.searchParams.append("year", year);
 
-  try {
-    const response = await fetch(url);
-    const data = await response.json();
-    setFilteredQuestions(data);
+    console.log("Fetching from:", url.toString());
+
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      setFilteredQuestions(data);
+      const user = JSON.parse(localStorage.getItem("codeplayground-user"));
+      const userId = user?._id;
+
+      if (userId) {
+        const progressRes = await fetch(`${API}/api/progress/${userId}`);
+        const progressData = await progressRes.json();
+
+        const tickMap = {};
+        progressData.forEach(id => { tickMap[id] = true });
+        setTickedQuestions(tickMap);
+      }
+
+      setNoMatch(data.length === 0);
+      previousQuery.current = company;
+    } catch (err) {
+      console.error("❌ Failed to fetch questions:", err);
+      setFilteredQuestions([]);
+      setNoMatch(true);
+    }
+  };
+
+  const toggleTick = async (questionId) => {
+    if (!questionId) return;
     const user = JSON.parse(localStorage.getItem("codeplayground-user"));
-    const userId=user?._id;
+    const userId = user?._id;
+    const isSolved = !tickedQuestions[questionId];
 
-if (userId) {
-  const progressRes = await fetch(`${API}/api/progress/${userId}`);
-  const progressData = await progressRes.json();
+    setTickedQuestions(prev => ({ ...prev, [questionId]: isSolved }));
 
-  const tickMap = {};
-  progressData.forEach(id => { tickMap[id] = true });
-  setTickedQuestions(tickMap);
-}
-
-    setNoMatch(data.length === 0);
-    previousQuery.current = company;
-  } catch (err) {
-    console.error("❌ Failed to fetch questions:", err);
-    setFilteredQuestions([]);
-    setNoMatch(true);
-  }
-};
-
-const toggleTick = async (questionId) => {
-  if (!questionId) return;
-   const user = JSON.parse(localStorage.getItem("codeplayground-user"));
-    const userId=user?._id;
-  const isSolved = !tickedQuestions[questionId];
-
-  setTickedQuestions(prev => ({ ...prev, [questionId]: isSolved }));
-
-  if (userId) {
-    await fetch(`${API}/api/progress`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, questionId, isSolved }),
-    });
-  }
-};
+    if (userId) {
+      await fetch(`${API}/api/progress`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, questionId, isSolved }),
+      });
+    }
+  };
 
   const topicCounts = filteredQuestions.reduce((acc, q) => {
     const label = q.topic || 'General';
@@ -211,12 +232,12 @@ const toggleTick = async (questionId) => {
             <select value={role} onChange={e => setRole(e.target.value)} className="p-3 border rounded-md dark:bg-gray-700 text-lg">
               <option value="">Select Role</option>
               <option value="Software Engineer">Software Engineer</option>
-              
+
             </select>
             <select value={yoe} onChange={e => setYoe(e.target.value)} className="p-3 border rounded-md dark:bg-gray-700 text-lg">
               <option value="">Years of Experience</option>
               <option value="College Graduate">College Graduate</option>
-    
+
             </select>
           </div>
 
@@ -243,7 +264,7 @@ const toggleTick = async (questionId) => {
               <option value="Easy">Easy</option>
               <option value="Medium">Medium</option>
               <option value="Hard">Hard</option>
-            </select> 
+            </select>
           </div>
         </div>
 
@@ -307,11 +328,11 @@ const toggleTick = async (questionId) => {
               </div>
             </div>
           </div>
-        ) : (
+        ) : noMatch ? (
           <div className="bg-yellow-100 dark:bg-yellow-800 text-yellow-900 dark:text-yellow-300 p-4 rounded-md text-center font-semibold">
             No questions found for the selected filters.
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );
