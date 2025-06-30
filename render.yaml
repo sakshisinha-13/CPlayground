@@ -7,7 +7,9 @@ services:
     plan: free
     envVars:
       - key: REACT_APP_API_BASE
+        value: dummy
       - key: COMPILER_API
+        value: dummy
 
   - type: web
     name: backend
@@ -17,7 +19,9 @@ services:
     plan: free
     envVars:
       - key: MONGO_URI
+        value: dummy
       - key: JWT_SECRET
+        value: dummy
 
   - type: web
     name: compiler
@@ -27,4 +31,6 @@ services:
     plan: free
     envVars:
       - key: PORT
+        value: "8000"
       - key: GEMINI_API_KEY
+        value: dummy
