@@ -1,7 +1,6 @@
 {
   "name": "question-curation",
   "version": "0.1.0",
-  "proxy": "https://cplayground-2.onrender.com/",
   "private": true,
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",

@@ -15,7 +15,11 @@ require("dotenv").config();
 const app = express();
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://frontend:3000","https://c-playground.vercel.app"],
+    origin: [
+      "http://localhost:3000",
+      "http://frontend:3000",
+      "https://c-playground-cyn81li0y-sakshisinha-13s-projects.vercel.app"
+    ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
