@@ -4,6 +4,7 @@ services:
     env: docker
     repo: https://github.com/sakshisinha-13/CPlayground
     dockerContext: ./client
+    dockerfilePath: Dockerfile
     plan: free
     envVars:
       - key: REACT_APP_API_BASE
@@ -16,6 +17,7 @@ services:
     env: docker
     repo: https://github.com/sakshisinha-13/CPlayground
     dockerContext: ./server
+    dockerfilePath: Dockerfile
     plan: free
     envVars:
       - key: MONGO_URI
@@ -28,6 +30,7 @@ services:
     env: docker
     repo: https://github.com/sakshisinha-13/CPlayground
     dockerContext: ./compiler
+    dockerfilePath: Dockerfile
     plan: free
     envVars:
       - key: PORT
