@@ -244,7 +244,7 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             <select value={assessmentType} onChange={e => setAssessmentType(e.target.value)} className="p-3 border rounded-md dark:bg-gray-700 text-lg">
               <option value="">Select Round</option>
-              {/*<option value="OA">Online Assessment</option>*/}
+              <option value="OA">Online Assessment</option>
               <option value="Interview">Interview</option>
             </select>
             <select value={topic} onChange={e => setTopic(e.target.value)} className="p-3 border rounded-md dark:bg-gray-700 text-lg">

@@ -85,38 +85,38 @@ Only one valid answer exists.`,
     yoe: "College Graduate"
   },
   {
-  title: "Generate Parentheses",
-  description: "Given n pairs of parentheses, write a function to generate all combinations of well-formed parentheses.",
-  inputFormat: "n (e.g., 3)",
-  outputFormat: "[\"((()))\",\"(()())\",\"(())()\",\"()(())\",\"()()()\"]",
-  constraints: "1 <= n <= 8",
-  examples: [
-    {
-      input: "3",
-      output: "[\"((()))\",\"(()())\",\"(())()\",\"()(())\",\"()()()\"]"
-    },
-    {
-      input: "1",
-      output: "[\"()\"]"
-    }
-  ],
-  testCases: [
-    {
-      input: "2",
-      expectedOutput: "[\"(())\",\"()()\"]"
-    },
-    {
-      input: "4",
-      expectedOutput: "[\"(((())))\",\"((()()))\",\"((())())\",\"((()))()\",\"(()(()))\",\"(()()())\",\"(()())()\",\"(())(())\",\"(())()()\",\"()((()))\",\"()(()())\",\"()(())()\",\"()()(())\",\"()()()()\"]"
-    }
-  ],
-  difficulty: "Medium",
-  topic: "dsa",
-  type: "Interview",
-  company: "Microsoft",
-  role: "Software Engineer",
-  yoe: "College Graduate"
-},
+    title: "Generate Parentheses",
+    description: "Given n pairs of parentheses, write a function to generate all combinations of well-formed parentheses.",
+    inputFormat: "n (e.g., 3)",
+    outputFormat: "[\"((()))\",\"(()())\",\"(())()\",\"()(())\",\"()()()\"]",
+    constraints: "1 <= n <= 8",
+    examples: [
+      {
+        input: "3",
+        output: "[\"((()))\",\"(()())\",\"(())()\",\"()(())\",\"()()()\"]"
+      },
+      {
+        input: "1",
+        output: "[\"()\"]"
+      }
+    ],
+    testCases: [
+      {
+        input: "2",
+        expectedOutput: "[\"(())\",\"()()\"]"
+      },
+      {
+        input: "4",
+        expectedOutput: "[\"(((())))\",\"((()()))\",\"((())())\",\"((()))()\",\"(()(()))\",\"(()()())\",\"(()())()\",\"(())(())\",\"(())()()\",\"()((()))\",\"()(()())\",\"()(())()\",\"()()(())\",\"()()()()\"]"
+      }
+    ],
+    difficulty: "Medium",
+    topic: "dsa",
+    type: "Interview",
+    company: "Microsoft",
+    role: "Software Engineer",
+    yoe: "College Graduate"
+  },
   {
     title: "Check for Majority Element in a Sorted Array",
     description: "Given an array arr of N elements, a majority element is one that appears more than N/2 times. Write a function `isMajority()` that returns true if the given element is a majority element in the sorted array.",
@@ -144,33 +144,33 @@ Only one valid answer exists.`,
     role: "Software Engineer",
     yoe: "College Graduate"
   },
- {
-  title: "Longest Increasing Consecutive Subsequence",
-  description: "Given N elements, write a program that prints the length of the longest increasing consecutive subsequence. Two consecutive elements in the subsequence must differ by 1.",
-  inputFormat: "First line contains N followed by the N array elements.",
-  outputFormat: "Length of the longest increasing consecutive subsequence",
-  constraints: "1 ≤ N ≤ 10^5, -10^9 ≤ a[i] ≤ 10^9",
-  examples: [
-    {
-      input: "10 3 10 3 11 4 5 6 7 8 12",
-      output: "6"
-    },
-    {
-      input: "8 6 7 8 3 4 5 9 10",
-      output: "5"
-    }
-  ],
-  testCases: [
-    { input: "5 1 2 3 10 20", expectedOutput: "3" },
-    { input: "6 4 5 6 1 2 3", expectedOutput: "3" }
-  ],
-  difficulty: "Easy",
-  topic: "dsa",
-  type: "Interview",
-  company: "Microsoft",
-  role: "Software Engineer",
-  yoe: "College Graduate"
-}
+  {
+    title: "Longest Increasing Consecutive Subsequence",
+    description: "Given N elements, write a program that prints the length of the longest increasing consecutive subsequence. Two consecutive elements in the subsequence must differ by 1.",
+    inputFormat: "First line contains N followed by the N array elements.",
+    outputFormat: "Length of the longest increasing consecutive subsequence",
+    constraints: "1 ≤ N ≤ 10^5, -10^9 ≤ a[i] ≤ 10^9",
+    examples: [
+      {
+        input: "10 3 10 3 11 4 5 6 7 8 12",
+        output: "6"
+      },
+      {
+        input: "8 6 7 8 3 4 5 9 10",
+        output: "5"
+      }
+    ],
+    testCases: [
+      { input: "5 1 2 3 10 20", expectedOutput: "3" },
+      { input: "6 4 5 6 1 2 3", expectedOutput: "3" }
+    ],
+    difficulty: "Easy",
+    topic: "dsa",
+    type: "Interview",
+    company: "Microsoft",
+    role: "Software Engineer",
+    yoe: "College Graduate"
+  }
 
 ];
 
@@ -181,7 +181,7 @@ const start = async () => {
       useUnifiedTopology: true,
     });
     await Problem.deleteMany({});
-     await Problem.insertMany(sampleProblems);
+    await Problem.insertMany(sampleProblems);
     console.log("✅ Problems seeded successfully!");
     process.exit();
   } catch (error) {
