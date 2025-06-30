@@ -7,9 +7,7 @@ services:
     plan: free
     envVars:
       - key: REACT_APP_API_BASE
-        value: http://backend:5000
       - key: COMPILER_API
-        value: http://compiler:8000/run
 
   - type: web
     name: backend
@@ -19,9 +17,7 @@ services:
     plan: free
     envVars:
       - key: MONGO_URI
-        value: mongodb+srv://Sakshi:sakshi123@cluster0.oza1zcj.mongodb.net/codeplayground?retryWrites=true&w=majority&appName=Cluster0
       - key: JWT_SECRET
-        value: algouni-secret
 
   - type: web
     name: compiler
@@ -31,6 +27,4 @@ services:
     plan: free
     envVars:
       - key: PORT
-        value: 8000
       - key: GEMINI_API_KEY
-        value: AIzaSyATS1hr0ehu4RPCCWO5AReSVOebhWP5ZGc
