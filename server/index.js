@@ -18,7 +18,7 @@ app.use(
     origin: [
       "http://localhost:3000",
       "http://frontend:3000",
-      "https://c-playground-cyn81li0y-sakshisinha-13s-projects.vercel.app"
+      "https://c-playground-hd4udi67f-sakshisinha-13s-projects.vercel.app/login"
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
