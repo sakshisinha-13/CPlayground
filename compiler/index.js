@@ -7,7 +7,6 @@ const { executeCode } = require("./utils/execute");
 app.use(cors());
 app.use(express.json());
 
-app.post("/run", async (req, res) => {
   const { code, language, testCases } = req.body;
 
   try {
