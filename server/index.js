@@ -52,7 +52,7 @@ const progressRoutes = require("./routes/progress");
 app.use("/api/progress", progressRoutes);
 
 const codeRoutes = require("./routes/codeRoutes");
-app.use("/api/code", codeRoutes);
+app.use("/api/code/execute", codeRoutes);
 
 
 // --- Routes ---
