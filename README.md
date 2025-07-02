@@ -6,8 +6,7 @@ A full-stack web application that allows users to practice and track Online Asse
 
 ## Live Deployed Link
 
-**Frontend:** [http://13.232.160.241:3000/dashboard](http://13.232.160.241:3000/dashboard)
-(Hosted on AWS EC2 using Docker Compose)
+**Frontend:** https://c-playground.vercel.app/dashboard
 
 ---
 
