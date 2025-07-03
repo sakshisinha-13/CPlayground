@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import AceEditor from "react-ace";
 import axios from "axios";
-import { getAIResponse } from "../api/ai"; 
+import { getAIResponse } from "../api/ai";
 import {
   Panel,
   PanelGroup,
@@ -50,6 +50,8 @@ const Playground = () => {
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState(""); // ✅ AI Feedback
   const [aiLoading, setAiLoading] = useState(false); // ✅ AI loading
+  const [customInput, setCustomInput] = useState("");
+  const [useCustomInput, setUseCustomInput] = useState(false);
 
   useEffect(() => {
     if (!state || !state.title) navigate("/dashboard");
@@ -60,36 +62,81 @@ const Playground = () => {
     setCode(defaultCodeMap[language]);
   }, [language]);
 
+ 
+  //   setLoading(true);
+  //   try {
+  //     const raw = Array.isArray(state.testCases)
+  //       ? state.testCases
+  //       : Array.isArray(state.examples)
+  //         ? state.examples
+  //         : [];
+
+  //     const testCases = Array.isArray(raw)
+  //       ? raw.map((ex) => ({
+  //         input: ex.input,
+  //         expectedOutput: ex.expectedOutput || ex.output || "",
+  //       }))
+  //       : [];
+
+  //       const API_BASE = process.env.REACT_APP_API_BASE;
+  //     const res = await axios.post(`${API_BASE}/api/code/execute`, {
+  //       language,
+  //       code,
+  //       testCases,
+  //     });
+
+  //     setResults(res.data);
+  //   } catch (err) {
+  //     setResults([{ status: "Error", actualOutput: err.message }]);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   const runCode = async () => {
     setLoading(true);
-    try {
-      const raw = Array.isArray(state.testCases)
-        ? state.testCases
-        : Array.isArray(state.examples)
-          ? state.examples
-          : [];
 
-      const testCases = Array.isArray(raw)
-        ? raw.map((ex) => ({
+    try {
+      const API_BASE = process.env.REACT_APP_API_BASE;
+
+      let testCases;
+
+      if (useCustomInput && customInput.trim()) {
+        // ✅ User gave custom input — run only this without expectedOutput
+        testCases = [
+          {
+            input: customInput,
+            expectedOutput: "", // Skip comparison
+          },
+        ];
+      } else {
+        // ✅ No custom input — use predefined testcases from problem
+        const raw = Array.isArray(state.testCases)
+          ? state.testCases
+          : Array.isArray(state.examples)
+            ? state.examples
+            : [];
+
+        testCases = raw.map((ex) => ({
           input: ex.input,
           expectedOutput: ex.expectedOutput || ex.output || "",
-        }))
-        : [];
+        }));
+      }
 
-        const API_BASE = process.env.REACT_APP_API_BASE;
       const res = await axios.post(`${API_BASE}/api/code/execute`, {
-        language,
         code,
+        language,
         testCases,
       });
 
       setResults(res.data);
     } catch (err) {
-      setResults([{ status: "Error", actualOutput: err.message }]);
-    } finally {
-      setLoading(false);
+      console.error("Execution failed:", err);
+      setResults([{ actualOutput: "Execution failed." }]);
     }
+
+    setLoading(false);
   };
+
 
   const getAIReview = async () => {
     setAiLoading(true);
@@ -103,9 +150,9 @@ const Playground = () => {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-gray-50 dark:bg-gray-900">
-     
+
       {/* LEFT PANEL */}
-      <div className="md:w-1/2 p-6 overflow-y-auto max-h-screen bg-white dark:bg-gray-900 border-b md:border-b-0 md:border-r border-gray-300 dark:border-gray-700">
+      <div className="md:w-1/2 p-6 overflow-y-auto h-screen bg-white dark:bg-gray-900 border-b md:border-b-0 md:border-r border-gray-300 dark:border-gray-700">
         <button
           className="mb-4 px-3 py-1 bg-gray-200 dark:bg-gray-200 text-sm rounded hover:bg-gray-300 dark:hover:bg-gray-300"
           onClick={() => navigate("/dashboard")}
@@ -124,27 +171,27 @@ const Playground = () => {
         <section className="mt-6 space-y-4 text-sm">
           <div>
             <h2 className="font-semibold text-base dark:text-white">Description:</h2>
-            <div className="bg-gray-100 dark:bg-gray-800 dark:text-white p-4 rounded whitespace-pre-wrap">{state.description}</div>
+            <div className="bg-gray-200 dark:bg-gray-800 dark:text-white p-4 rounded whitespace-pre-wrap">{state.description}</div>
           </div>
 
           {state.inputFormat && (
             <div>
               <h2 className="font-semibold text-base dark:text-white">Input Format:</h2>
-              <div className="bg-gray-100 dark:bg-gray-800 dark:text-white p-3 rounded">{state.inputFormat}</div>
+              <div className="bg-gray-200 dark:bg-gray-800 dark:text-white p-3 rounded">{state.inputFormat}</div>
             </div>
           )}
 
           {state.outputFormat && (
             <div>
               <h2 className="font-semibold text-base dark:text-white">Output Format:</h2>
-              <div className="bg-gray-100 dark:bg-gray-800 dark:text-white p-3 rounded">{state.outputFormat}</div>
+              <div className="bg-gray-200 dark:bg-gray-800 dark:text-white p-3 rounded">{state.outputFormat}</div>
             </div>
           )}
 
           {state.constraints && (
             <div>
               <h2 className="font-semibold text-base dark:text-white">Constraints:</h2>
-              <div className="bg-gray-100 dark:bg-gray-800 dark:text-white p-3 rounded whitespace-pre-wrap">{state.constraints}</div>
+              <div className="bg-gray-200 dark:bg-gray-800 dark:text-white p-3 rounded whitespace-pre-wrap">{state.constraints}</div>
             </div>
           )}
 
@@ -153,7 +200,7 @@ const Playground = () => {
               <h2 className="font-semibold text-base dark:text-white">Examples:</h2>
               <ul className="space-y-2 dark:text-white">
                 {state.examples.map((ex, idx) => (
-                  <li key={idx} className="bg-gray-100 dark:bg-gray-800 p-3 rounded">
+                  <li key={idx} className="bg-gray-200 dark:bg-gray-800 p-3 rounded">
                     <strong>Input:</strong> {ex.input}<br />
                     <strong>Output:</strong> {ex.output}
                   </li>
@@ -166,7 +213,7 @@ const Playground = () => {
       </div>
 
       {/* RIGHT PANEL */}
-      <div className="lg:w-1/2 w-full bg-gray-200 dark:bg-gray-900 text-white rounded-md p-4 space-y-4">
+      <div className="lg:w-1/2 w-full overflow-y-auto h-screen bg-gray-200 dark:bg-gray-900 text-white rounded-md p-4 space-y-4">
         <div className="flex items-center justify-between">
           <select
             value={language}
@@ -215,16 +262,34 @@ const Playground = () => {
             tabSize: 2,
           }}
         />
+        <div className="mt-4">
+          <label className="block text-black dark:text-white font-semibold mb-1">Custom Input (Optional)</label>
+          <textarea
+            placeholder="Enter input to be given to your code"
+            value={customInput}
+            onChange={(e) => setCustomInput(e.target.value)}
+            rows={5}
+            className="border border-gray-300 text-black bg-white p-2 mt-1 w-full rounded resize-none"
+          />
+        </div>
 
         {Array.isArray(results) && results.length > 0 && (
           <div className="bg-gray-800 p-4 rounded-md text-sm space-y-3 max-h-[300px] overflow-y-auto">
             <h3 className="font-bold text-lg">Test Case Results:</h3>
             {results.map((res, idx) => (
-              <div key={idx} className={`p-2 rounded ${res.status?.includes("Accepted") ? 'bg-green-800' : 'bg-red-900'}`}>
+              <div key={idx} className={`p-2 rounded ${res.passed===true ? "bg-green-800" : res.passed===false ? "bg-red-900" : "bg-blue-800"}`}>
                 <p><strong>Input:</strong> {res.input}</p>
-                <p><strong>Expected:</strong> {res.expectedOutput}</p>
+                {/* <p><strong>Expected:</strong> {res.expectedOutput}</p>
                 <p><strong>Actual:</strong> {res.actualOutput}</p>
-                <p><strong>Status:</strong> {res.status}</p>
+                <p><strong>Status:</strong> {res.status}</p> */}
+                <p><strong>Output:</strong> {res.actualOutput}</p>
+                {/* ✅ Show Expected and Status only if it's a DB testcase */}
+                {res.passed !== null && (
+                  <>
+                    <p><strong>Expected:</strong> {res.expectedOutput}</p>
+                    <p><strong>Status:</strong> {res.status}</p>
+                  </>
+                )}
               </div>
             ))}
           </div>
@@ -237,8 +302,8 @@ const Playground = () => {
         )}
 
       </div>
-     
-     </div>
+
+    </div>
   );
 };
 
