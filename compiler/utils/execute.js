@@ -119,6 +119,83 @@ const LANG_CONFIG = {
   },
 };
 
+// const executeCode = async (code, language, testCases = []) => {
+//   const cfg = LANG_CONFIG[language];
+//   if (!cfg) throw new Error("❌ Unsupported language");
+
+//   const filePath = path.join(WORKSPACE, cfg.file);
+//   fs.writeFileSync(filePath, code);
+
+//   // Compile if needed
+//   if (cfg.compile) {
+//     console.log("🔧 Compiling...");
+//     await new Promise((resolve, reject) => {
+//       exec(cfg.compile, { cwd: WORKSPACE }, (err, stdout, stderr) => {
+//         if (err) {
+//           console.error("❌ Compilation error:", stderr || err.message);
+//           return reject(stderr || err.message);
+//         }
+//         resolve(stdout);
+//       });
+//     });
+//     console.log("✅ Compilation successful");
+//   }
+
+//   // Run test cases
+//   // const results = await Promise.all(
+//   //   testCases.map((tc) => {
+//   //     return new Promise((resolve) => {
+//   //       const proc = exec(cfg.run, { cwd: WORKSPACE, timeout: 5000 }, (err, stdout, stderr) => {
+//   //         const output = (err ? stderr || err.message : stdout).trim();
+//   //         const expected = (tc.expectedOutput || "").trim();
+
+//   //         const result = {
+//   //           input: tc.input,
+//   //           expectedOutput: expected,
+//   //           actualOutput: output,
+//   //         };
+
+//   //         if (expected === "") {
+//   //           result.status = "⚠️ Custom Run";
+//   //           result.passed = null;
+//   //         } else {
+//   //           result.status = output === expected ? "✅ Accepted" : "❌ Failed";
+//   //           result.passed = output === expected;
+//   //         }
+
+//   //         resolve(result);
+//   //       });
+
+//   //       if (proc.stdin) {
+//   //         proc.stdin.write(tc.input || "");
+//   //         proc.stdin.end();
+//   //       }
+//   //     });
+//   //   })
+//   // );
+//   const output = (err ? stderr || err.message : stdout).trim();
+// const expected = (tc.expectedOutput || "").trim();
+
+// const result = {
+//   input: tc.input,
+//   expectedOutput: expected,
+//   actualOutput: output,
+// };
+
+// if (expected === "") {
+//   // ✅ Skip status if no expected output
+//   result.status = "⚠️ Custom Run";
+//   result.passed = null;
+// } else {
+//   result.status = output === expected ? "✅ Accepted" : "❌ Failed";
+//   result.passed = output === expected;
+// }
+
+// resolve(result);
+
+
+//   return results;
+// };
 const executeCode = async (code, language, testCases = []) => {
   const cfg = LANG_CONFIG[language];
   if (!cfg) throw new Error("❌ Unsupported language");
@@ -141,7 +218,7 @@ const executeCode = async (code, language, testCases = []) => {
     console.log("✅ Compilation successful");
   }
 
-  // Run test cases
+  // ✅ Run test cases one by one (including custom input)
   const results = await Promise.all(
     testCases.map((tc) => {
       return new Promise((resolve) => {
@@ -167,7 +244,7 @@ const executeCode = async (code, language, testCases = []) => {
         });
 
         if (proc.stdin) {
-          proc.stdin.write(tc.input || "");
+          proc.stdin.write((tc.input || "").replace(/\\n/g, "\n"));
           proc.stdin.end();
         }
       });
@@ -176,5 +253,6 @@ const executeCode = async (code, language, testCases = []) => {
 
   return results;
 };
+
 
 module.exports = { executeCode };

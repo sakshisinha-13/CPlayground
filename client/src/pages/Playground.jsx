@@ -51,7 +51,6 @@ const Playground = () => {
   const [feedback, setFeedback] = useState(""); // ✅ AI Feedback
   const [aiLoading, setAiLoading] = useState(false); // ✅ AI loading
   const [customInput, setCustomInput] = useState("");
-  const [useCustomInput, setUseCustomInput] = useState(false);
 
   useEffect(() => {
     if (!state || !state.title) navigate("/dashboard");
@@ -100,7 +99,7 @@ const Playground = () => {
 
       let testCases;
 
-      if (useCustomInput && customInput.trim()) {
+      if (customInput.trim()) {
         // ✅ User gave custom input — run only this without expectedOutput
         testCases = [
           {
