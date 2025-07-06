@@ -30,7 +30,6 @@ const startRecording = async () => {
   };
 
   mediaRecorder.start();
-  setTimeout(() => mediaRecorder.stop(), 15000); // record for 15 seconds
 };
 
 // Add this button inside your return block

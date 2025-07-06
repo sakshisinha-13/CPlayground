@@ -2,8 +2,9 @@ import whisper
 import sys
 import subprocess
 import json
+import io
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
-# ✅ Safety check for arguments
 if len(sys.argv) < 3:
     print("Missing arguments.")
     sys.exit(1)
@@ -11,51 +12,58 @@ if len(sys.argv) < 3:
 audio_path = sys.argv[1]
 code = sys.argv[2]
 
-# ✅ Transcribe with Whisper
+# Transcribe
 model = whisper.load_model("base")
 result = model.transcribe(audio_path)
 transcript = result["text"]
 
-# ✅ Prepare prompt
 prompt = f"""
-You are an AI interviewer. The student wrote the following code:
+You are an extremely strict and detail-oriented AI interviewer.
 
+The student wrote the following code:
 {code}
 
-And verbally explained:
-
+And gave this verbal explanation:
 "{transcript}"
 
-Please evaluate:
-- Have they explained the approach?
-- Did they mention time and space complexity?
-- Did they do a dry run for the first test case?
+Your task:
+1. Verify if their explanation correctly describes the approach used in the code.
+2. Check if they correctly stated time and space complexity. Do NOT assume it's correct—analyze and validate it based on the code.
+3. Check if they performed a proper dry run with a test case.
 
-If everything is correct, say: "Good job!"  
-Otherwise, say: "You are good but try improving this..." and give suggestions.
+🔒 Rules:
+- If any part is incorrect or missing, DO NOT say "Good job."
+- Give very specific feedback only based on the explanation. Do NOT assume correctness from code alone.
+- Highlight any incorrect time/space complexity mentioned.
+- If dry run is missing or flawed, mention it.
 
-Only reply with the final feedback.
+🎯 Only return one of the following:
+- If everything is correct and clearly explained, return: "✅ Good job!"
+- Else, return: "❌ You are good but try improving this..." followed by your detailed suggestions.
+
+Only output the final feedback. Do NOT include summary or extra context.
 """
 
-# ✅ Send prompt to Ollama locally
+
+# Ollama call
 ollama_response = subprocess.run(
     [
         "curl", "-s", "http://localhost:11434/api/generate",
         "-d", json.dumps({
             "model": "gemma3",
-            "prompt": prompt
+            "prompt": prompt,
+            "stream": False  # ⛳️ Important: disables streaming chunks
         })
     ],
     stdout=subprocess.PIPE
 )
 
-# ✅ Decode Ollama's streaming response
+# Parse response
 try:
-    output = ollama_response.stdout.decode()
-    # Sometimes response is in streaming chunks — extract last one
-    lines = output.strip().split("\n")
-    last_line = lines[-1]
-    parsed = json.loads(last_line)
-    print(parsed.get("response", "AI didn't return anything useful."))
+    output = ollama_response.stdout.decode("utf-8")
+    parsed = json.loads(output)
+    response_text = parsed.get("response", "AI didn't return anything useful.")
+    
+    print(response_text.strip().encode('utf-8', 'ignore').decode())
 except Exception as e:
-    print("Error parsing Ollama response:", e)
+    print("Error talking to Ollama:", str(e))

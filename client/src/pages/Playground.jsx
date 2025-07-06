@@ -47,7 +47,8 @@ const Playground = () => {
   const [customInput, setCustomInput] = useState("");
   const [recording, setRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState(null);
-
+  const [speaking, setSpeaking] = useState(false);
+  const [recordingCancelled, setRecordingCancelled] = useState(false);
 
   useEffect(() => {
     if (!state || !state.title) navigate("/dashboard");
@@ -58,56 +59,82 @@ const Playground = () => {
     setCode(defaultCodeMap[language]);
   }, [language]);
 
- const speakPrompt = async () => {
-  const msg = new SpeechSynthesisUtterance(
-    "Tell me your approach, time and space complexity of this code, and do a dry run on the first example."
-  );
-  msg.lang = "en-US";
+  const speakPrompt = async () => {
+    const msg = new SpeechSynthesisUtterance(
+      "Explain your approach, time and space complexity of this code, and do a dry run on the first example."
+    );
+    msg.lang = "en-US";
 
-  msg.onend = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
-      const chunks = [];
+    setSpeaking(true); // 🟡 Show lighter yellow while talking
 
-      recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) chunks.push(e.data);
-      };
+    msg.onend = async () => {
+      setSpeaking(false); // ✅ Reset to normal
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const recorder = new MediaRecorder(stream);
+        const chunks = [];
 
-      recorder.onstop = async () => {
-        const blob = new Blob(chunks, { type: "audio/webm" });
-        const formData = new FormData();
-        formData.append("audio", blob);
-        formData.append("code", code);
+        recorder.ondataavailable = (e) => {
+          if (e.data.size > 0) chunks.push(e.data);
+        };
 
-        setAiLoading(true);
-        try {
-          const res = await fetch("http://localhost:5000/evaluate", {
-            method: "POST",
-            body: formData,
-          });
+        recorder.onstop = async () => {
+          if (recordingCancelled) {
+            setRecordingCancelled(false); // reset flag
+            setRecording(false);
+            setSpeaking(false);
+            setAiLoading(false);
+            setMediaRecorder(null);
+            return; // don't send audio to server
+          }
+          const blob = new Blob(chunks, { type: "audio/webm" });
+          const formData = new FormData();
+          formData.append("audio", blob);
+          formData.append("code", code);
 
-          const data = await res.json();
-          setFeedback(data.feedback);
-        } catch (err) {
-          setFeedback("Something went wrong while analyzing your explanation.");
-        } finally {
-          setAiLoading(false);
-          setRecording(false);
-          setMediaRecorder(null);
-        }
-      };
+          setAiLoading(true);
+          try {
+            const res = await fetch("http://localhost:5000/evaluate", {
+              method: "POST",
+              body: formData,
+            });
 
-      recorder.start();
-      setMediaRecorder(recorder);
-      setRecording(true);
-    } catch (err) {
-      alert("Microphone error: " + err.message);
-    }
+            const data = await res.json();
+            setFeedback(data.feedback);
+          } catch (err) {
+            setFeedback("Something went wrong while analyzing your explanation.");
+          } finally {
+            setAiLoading(false);
+            setRecording(false);
+            setMediaRecorder(null);
+          }
+        };
+
+        recorder.start();
+        setMediaRecorder(recorder);
+        setRecording(true);
+      } catch (err) {
+        alert("Microphone error: " + err.message);
+      }
+    };
+
+    window.speechSynthesis.speak(msg);
   };
-
-  window.speechSynthesis.speak(msg);
-};
+  const cancelExplanation = () => {
+    window.speechSynthesis.cancel();
+    setSpeaking(false);
+    setRecordingCancelled(true);
+    if (mediaRecorder && mediaRecorder.state === "recording") {
+      mediaRecorder.stop();
+    }
+    if (mediaRecorder?.stream) {
+      mediaRecorder.stream.getTracks().forEach((track) => track.stop()); // 🛑 This is important!
+    }
+    setRecording(false);
+    setMediaRecorder(null);
+    setFeedback("");
+    setAiLoading(false);
+  };
 
   const runCode = async () => {
     setLoading(true);
@@ -256,22 +283,33 @@ const Playground = () => {
           >
             {aiLoading ? "Analyzing..." : "AI Feedback"}
           </button>
-{!recording ? (
-  <button
-    onClick={speakPrompt}
-    className="px-4 py-2 rounded mt-2 bg-yellow-500 hover:bg-yellow-600 transition disabled:opacity-60 text-black"
-    disabled={aiLoading}
-  >
-    🎤 Start Explanation
-  </button>
-) : (
-  <button
-    onClick={() => mediaRecorder && mediaRecorder.stop()}
-    className="px-4 py-2 rounded mt-2 bg-red-600 hover:bg-red-700 transition text-white"
-  >
-    🛑 Stop Recording
-  </button>
-)}
+          {!recording ? (
+            <button
+              onClick={speakPrompt}
+              className={`px-4 py-2 rounded mt-2 transition disabled:opacity-60 text-black 
+      ${speaking ? "bg-yellow-400 cursor-not-allowed" : "bg-yellow-500 hover:bg-yellow-700"}
+    `}
+              disabled={aiLoading || speaking}
+            >
+              🎤 Start Explanation
+            </button>
+          ) : (
+            <button
+              onClick={() => { if (mediaRecorder && mediaRecorder.state === "recording") { mediaRecorder.stop(); setRecording(false); } }}
+              className="px-4 py-2 rounded mt-2 bg-red-600 hover:bg-red-700 transition text-white"
+            >
+              🛑 Stop Recording
+            </button>
+
+          )}
+          {(recording || speaking) && (
+            <button
+              onClick={cancelExplanation}
+              className="px-4 py-2 rounded mt-2 bg-gray-600 hover:bg-gray-700 transition text-white"
+            >
+              ❌ Cancel Explanation
+            </button>
+          )}
 
         </div>
 
@@ -310,7 +348,7 @@ const Playground = () => {
           <div className="bg-gray-800 p-4 rounded-md text-sm space-y-3 max-h-[300px] overflow-y-auto">
             <h3 className="font-bold text-lg">Test Case Results:</h3>
             {results.map((res, idx) => (
-              <div key={idx} className={`p-2 rounded ${res.passed===true ? "bg-green-800" : res.passed===false ? "bg-red-900" : "bg-blue-800"}`}>
+              <div key={idx} className={`p-2 rounded ${res.passed === true ? "bg-green-800" : res.passed === false ? "bg-red-900" : "bg-blue-800"}`}>
                 <p><strong>Input:</strong> {res.input}</p>
                 {/* <p><strong>Expected:</strong> {res.expectedOutput}</p>
                 <p><strong>Actual:</strong> {res.actualOutput}</p>
