@@ -3,12 +3,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import AceEditor from "react-ace";
 import axios from "axios";
 import { getAIResponse } from "../api/ai";
-import {
-  Panel,
-  PanelGroup,
-  PanelResizeHandle,
-} from "react-resizable-panels";
-
 
 import "ace-builds/src-noconflict/mode-javascript";
 import "ace-builds/src-noconflict/mode-python";
@@ -51,6 +45,9 @@ const Playground = () => {
   const [feedback, setFeedback] = useState(""); // ✅ AI Feedback
   const [aiLoading, setAiLoading] = useState(false); // ✅ AI loading
   const [customInput, setCustomInput] = useState("");
+  const [recording, setRecording] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState(null);
+
 
   useEffect(() => {
     if (!state || !state.title) navigate("/dashboard");
@@ -61,36 +58,57 @@ const Playground = () => {
     setCode(defaultCodeMap[language]);
   }, [language]);
 
- 
-  //   setLoading(true);
-  //   try {
-  //     const raw = Array.isArray(state.testCases)
-  //       ? state.testCases
-  //       : Array.isArray(state.examples)
-  //         ? state.examples
-  //         : [];
+ const speakPrompt = async () => {
+  const msg = new SpeechSynthesisUtterance(
+    "Tell me your approach, time and space complexity of this code, and do a dry run on the first example."
+  );
+  msg.lang = "en-US";
 
-  //     const testCases = Array.isArray(raw)
-  //       ? raw.map((ex) => ({
-  //         input: ex.input,
-  //         expectedOutput: ex.expectedOutput || ex.output || "",
-  //       }))
-  //       : [];
+  msg.onend = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      const chunks = [];
 
-  //       const API_BASE = process.env.REACT_APP_API_BASE;
-  //     const res = await axios.post(`${API_BASE}/api/code/execute`, {
-  //       language,
-  //       code,
-  //       testCases,
-  //     });
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunks.push(e.data);
+      };
 
-  //     setResults(res.data);
-  //   } catch (err) {
-  //     setResults([{ status: "Error", actualOutput: err.message }]);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+      recorder.onstop = async () => {
+        const blob = new Blob(chunks, { type: "audio/webm" });
+        const formData = new FormData();
+        formData.append("audio", blob);
+        formData.append("code", code);
+
+        setAiLoading(true);
+        try {
+          const res = await fetch("http://localhost:5000/evaluate", {
+            method: "POST",
+            body: formData,
+          });
+
+          const data = await res.json();
+          setFeedback(data.feedback);
+        } catch (err) {
+          setFeedback("Something went wrong while analyzing your explanation.");
+        } finally {
+          setAiLoading(false);
+          setRecording(false);
+          setMediaRecorder(null);
+        }
+      };
+
+      recorder.start();
+      setMediaRecorder(recorder);
+      setRecording(true);
+    } catch (err) {
+      alert("Microphone error: " + err.message);
+    }
+  };
+
+  window.speechSynthesis.speak(msg);
+};
+
   const runCode = async () => {
     setLoading(true);
 
@@ -238,6 +256,22 @@ const Playground = () => {
           >
             {aiLoading ? "Analyzing..." : "AI Feedback"}
           </button>
+{!recording ? (
+  <button
+    onClick={speakPrompt}
+    className="px-4 py-2 rounded mt-2 bg-yellow-500 hover:bg-yellow-600 transition disabled:opacity-60 text-black"
+    disabled={aiLoading}
+  >
+    🎤 Start Explanation
+  </button>
+) : (
+  <button
+    onClick={() => mediaRecorder && mediaRecorder.stop()}
+    className="px-4 py-2 rounded mt-2 bg-red-600 hover:bg-red-700 transition text-white"
+  >
+    🛑 Stop Recording
+  </button>
+)}
 
         </div>
 
@@ -267,7 +301,7 @@ const Playground = () => {
             placeholder="Enter input to be given to your code"
             value={customInput}
             onChange={(e) => setCustomInput(e.target.value)}
-            rows={5}
+            rows={4}
             className="border border-gray-300 text-black bg-white p-2 mt-1 w-full rounded resize-none"
           />
         </div>

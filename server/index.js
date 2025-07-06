@@ -63,6 +63,8 @@ app.use("/api/problems", problemRoutes); // Mounts GET /api/problems
 const aiRoutes = require("./routes/ai");
 app.use("/api/ai", aiRoutes);
 
+const evaluateRoute = require("./routes/evaluate");
+app.use("/", evaluateRoute);
 
 const path = require("path");
 
