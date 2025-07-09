@@ -19,6 +19,10 @@ app.use(
       "http://localhost:3000",
       "http://frontend:3000",
       "https://c-playground.vercel.app"
+      "http://localhost:3000",
+      "http://cplayground.me:3000",
+      "http://cplayground.me",
+     "http://34.93.148.23:3000"
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
