@@ -19,8 +19,8 @@ const startRecording = async () => {
     const formData = new FormData();
     formData.append("audio", blob);
     formData.append("code", code); // add current code
-
-    const res = await fetch("http://localhost:5000/evaluate", {
+    const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
+    const res = await fetch(`${API_BASE}/evaluate`, {
       method: "POST",
       body: formData,
     });

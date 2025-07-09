@@ -91,10 +91,10 @@ const Playground = () => {
           const formData = new FormData();
           formData.append("audio", blob);
           formData.append("code", code);
-
+          const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
           setAiLoading(true);
           try {
-            const res = await fetch("http://localhost:5000/evaluate", {
+            const res = await fetch(`${API_BASE}/evaluate`, {
               method: "POST",
               body: formData,
             });
