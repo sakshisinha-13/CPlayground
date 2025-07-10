@@ -68,7 +68,7 @@ const aiRoutes = require("./routes/ai");
 app.use("/api/ai", aiRoutes);
 
 const evaluateRoute = require("./routes/evaluate");
-app.use("/", evaluateRoute);
+app.use("/api/evaluate", evaluateRoute);
 
 const path = require("path");
 

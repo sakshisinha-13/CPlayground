@@ -94,7 +94,7 @@ const Playground = () => {
           const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
           setAiLoading(true);
           try {
-            const res = await fetch(`${API_BASE}/evaluate`, {
+            const res = await fetch(`${API_BASE}/api/evaluate`, {
               method: "POST",
               body: formData,
             });

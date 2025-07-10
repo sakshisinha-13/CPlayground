@@ -19,7 +19,7 @@ const upload = multer({ dest: "uploads/" });
 //     return res.json({ feedback: stdout.trim() });
 //   });
 // });
-router.post("/evaluate", upload.single("audio"), async (req, res) => {
+router.post("/", upload.single("audio"), async (req, res) => {
   if (!req.file || !req.body.code) {
     return res.status(400).json({ feedback: "Missing audio or code." });
   }
