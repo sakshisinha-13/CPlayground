@@ -5,7 +5,7 @@ import json
 import io
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
-if len(sys.argv) < 3:
+if len(sys.argv) < 4:
     print("Missing arguments.")
     sys.exit(1)
 

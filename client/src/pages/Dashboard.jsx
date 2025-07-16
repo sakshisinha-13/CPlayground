@@ -6,6 +6,7 @@ import { exportToPDFmake } from '../exports/exportPDFmake';
 import SimpleTableView from '../exports/SimpleTableView';
 import QuestionList from '../components/QuestionList';
 import Navbar from "../components/Navbar";
+import SpinnerInterview from '../components/SpinnerInterview';
 import {
   Chart as ChartJS,
   ArcElement,
@@ -49,6 +50,7 @@ export default function Dashboard() {
   const previousQuery = useRef('');
   const restoredFilters = useRef(false);
   const [tickedQuestions, setTickedQuestions] = useState({});
+  const [showSpinner, setShowSpinner] = useState(false);
   const [darkMode, setDarkMode] = useState(() => {
     const savedTheme = localStorage.getItem("theme");
     return savedTheme === "dark";
@@ -285,6 +287,14 @@ export default function Dashboard() {
               </div>
 
               <div className="bg-white dark:bg-gray-900 rounded-md p-6 shadow-md space-y-8">
+                <div className="flex justify-center">
+                <button
+                  onClick={() => setShowSpinner(true)}
+                  className="px-8 py-3 bg-indigo-400 dark:bg-blue-900 text-black dark:text-white rounded-md text-lg font-semibold hover:bg-indigo-700 transition"
+                >
+                  Mock Interview
+                </button>
+                </div>
                 <div>
                   <h3 className="font-bold mb-3 text-center">Questions by Topic</h3>
                   <div className="h-[320px]">
@@ -292,7 +302,10 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div className="bg-blue-200 dark:bg-blue-900 p-4 rounded-md">
+
+                {showSpinner && <SpinnerInterview onClose={() => setShowSpinner(false)} />}
+
+                <div className="bg-indigo-400 dark:bg-blue-900 p-4 rounded-md">
                   <h3 className="font-bold mb-2">📌 Company Insights</h3>
                   <p className="text-sm">
                     {query.trim()} {role} {assessmentType}:{' '}

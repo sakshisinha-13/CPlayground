@@ -70,6 +70,12 @@ app.use("/api/ai", aiRoutes);
 const evaluateRoute = require("./routes/evaluate");
 app.use("/api/evaluate", evaluateRoute);
 
+const spinnerEvalRoute = require('./routes/evaluateSpinner');
+app.use('/api/evaluate/spinner', spinnerEvalRoute);
+
+const interviewRoutes = require('./routes/interviewQuestions');
+app.use('/api/mock-questions', interviewRoutes);
+
 const path = require("path");
 
 // Serve static files from React
